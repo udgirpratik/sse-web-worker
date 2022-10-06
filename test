@@ -1,0 +1,174 @@
+import java.io.*;
+import java.math.*;
+import java.security.*;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+import java.util.regex.*;
+import java.util.stream.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+class Result {
+
+    /*
+     * Complete the 'connectedCell' function below.
+     *
+     * The function is expected to return an INTEGER.
+     * The function accepts 2D_INTEGER_ARRAY matrix as parameter.
+     */
+
+    public static int connectedCell(List<List<Integer>> matrix) {
+        int rowLength = matrix.size();
+        int columnLength = matrix.get(0).size();
+        int[][] aMatrix = generateMatrix(matrix, rowLength, columnLength);
+        Map<Node, Boolean> tracker = new HashMap<>();
+        return traverse(tracker, aMatrix, rowLength, columnLength);
+    }
+
+    private static int[][] generateMatrix(List<List<Integer>> matrix, int rowLength, int columnLength) {
+        int[][] aMatrix = new int[rowLength][columnLength];
+        int i=0;
+        for(List<Integer> row : matrix) {
+            int j = 0;
+            for(Integer val : row) {
+                aMatrix[i][j] = val;
+                j++;
+            }
+            i++;
+        }
+        return aMatrix;
+    }
+
+    private static int traverse (Map<Node, Boolean> tracker,  int[][] aMatrix, int rows, int columns) {
+        List<Integer> maxValues = new ArrayList<>();
+        for(int row = 0; row < rows; row++) {
+            for(int column = 0; column < columns; column++) {
+                Node node = new Node(row, column);
+                if(tracker.get(node) == null && aMatrix[row][column] == 1) {
+                    maxValues.add(findNeighbours(node, aMatrix, tracker,  rows,  columns));
+                }
+            }
+        }
+        return maxValues.stream().max(Comparator.naturalOrder()).get();
+    }
+
+    private static int findNeighbours(Node inode, int[][] aMatrix, Map<Node, Boolean> tracker, int rows, int columns) {
+        Queue<Node> nodes = new LinkedList<>();
+        nodes.add(inode);
+        int rowMin = 0, columnMin = 0 , rowMax = rows -1, columnMax = columns-1;
+        while(nodes.size() != 0) {
+            Node node = nodes.poll();
+            int rowPlusOne = node.getRow() + 1;
+            int rowMinusOne = node.getRow() - 1;
+            int columnPlusOne = node.getColumn() + 1;
+            int columnMinusOne = node.getColumn() - 1;
+            Integer left = null;
+            if(columnMinusOne >= columnMin) {
+                left  = aMatrix[columnMinusOne][node.getRow()];
+                 if(left == 1 && columnMinusOne >= columnMin) {
+                    Node leftNode = new Node(node.getRow(), columnMinusOne);
+                    nodes.add(leftNode);
+                    tracker.put(leftNode, true);
+                }
+            }
+            Integer right = null;
+             if(columnPlusOne <=  columnMax) {
+                right = aMatrix[columnPlusOne][node.getRow()];
+                 if(right == 1 && columnPlusOne <=  columnMax) {
+                    Node rightNode = new Node(node.getRow(), columnPlusOne);
+                    nodes.add(rightNode);
+                    tracker.put(rightNode, true);
+                 }
+             }
+            Integer up = null; 
+            if(rowMinusOne >= rowMin){
+                up = aMatrix[node.getColumn()][rowMinusOne];
+                if(up == 1 && rowMinusOne >= rowMin) {
+                    Node upNode = new Node(rowMinusOne, node.getColumn());
+                    nodes.add(upNode);
+                    tracker.put(upNode, true);
+                }
+            }
+            Integer down = null;
+            if(rowPlusOne <= rowMax) {
+                 down = aMatrix[node.getColumn()][rowPlusOne];
+                 if(down == 1 && rowPlusOne <= rowMax) {
+                   Node downNode = new Node(rowPlusOne, node.getColumn());
+                    nodes.add(downNode);
+                    tracker.put(downNode, true);
+                }
+            }
+           
+           
+           
+            
+        }
+        System.out.println("row : " + inode.getRow() + ", column :" + inode.getColumn() + ", Nodes : " + nodes);
+        return nodes.size();
+    }
+
+}
+
+ class Node {
+    private int row;
+    private int column;
+    public Node(int row, int column) {
+        this.row = row;
+        this.column = column;
+    }
+    
+    public int getRow() {
+        return this.row;
+    }
+    public int getColumn(){
+        return this.column;
+    }
+    
+    public boolean equals(Node n) {
+        return this.row == n.row && this.column == n.column;
+    }
+    
+    public int hashCode() {
+        return 1000*row + 2000*column;       
+    }
+    
+    public String toString() {
+        return "row:" + row + ",column:" + column;
+    }
+    
+}
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+
+        int n = Integer.parseInt(bufferedReader.readLine().trim());
+
+        int m = Integer.parseInt(bufferedReader.readLine().trim());
+
+        List<List<Integer>> matrix = new ArrayList<>();
+
+        IntStream.range(0, n).forEach(i -> {
+            try {
+                matrix.add(
+                    Stream.of(bufferedReader.readLine().replaceAll("\\s+$", "").split(" "))
+                        .map(Integer::parseInt)
+                        .collect(toList())
+                );
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        int result = Result.connectedCell(matrix);
+
+        bufferedWriter.write(String.valueOf(result));
+        bufferedWriter.newLine();
+
+        bufferedReader.close();
+        bufferedWriter.close();
+    }
+}
