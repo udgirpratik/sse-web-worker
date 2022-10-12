@@ -18,97 +18,52 @@ class Result {
      * The function is expected to return an INTEGER.
      * The function accepts 2D_INTEGER_ARRAY matrix as parameter.
      */
-
-    public static int connectedCell(List<List<Integer>> matrix) {
-        int rowLength = matrix.size();
-        int columnLength = matrix.get(0).size();
-        int[][] aMatrix = generateMatrix(matrix, rowLength, columnLength);
-        Map<Node, Boolean> tracker = new HashMap<>();
-        return traverse(tracker, aMatrix, rowLength, columnLength);
-    }
-
-    private static int[][] generateMatrix(List<List<Integer>> matrix, int rowLength, int columnLength) {
-        int[][] aMatrix = new int[rowLength][columnLength];
-        int i=0;
-        for(List<Integer> row : matrix) {
-            int j = 0;
-            for(Integer val : row) {
-                aMatrix[i][j] = val;
-                j++;
-            }
-            i++;
-        }
-        return aMatrix;
-    }
-
-    private static int traverse (Map<Node, Boolean> tracker,  int[][] aMatrix, int rows, int columns) {
-        List<Integer> maxValues = new ArrayList<>();
-        for(int row = 0; row < rows; row++) {
-            for(int column = 0; column < columns; column++) {
-                Node node = new Node(row, column);
-                if(tracker.get(node) == null && aMatrix[row][column] == 1) {
-                    maxValues.add(findNeighbours(node, aMatrix, tracker,  rows,  columns));
+   public static String biggerIsGreater(String w) {
+    // Write your code here
+        
+        char[] charsInW = w.toCharArray();
+        int lastCharIndex = charsInW.length-1;
+        int indexFound = 0;
+        boolean found = false;
+        for(int i = lastCharIndex; i > 0; i--) {
+            for(int j = i-1; j >= 0; j--) {
+                //System.out.println("---------------i-----------" + i + "**" + charsInW[i] );
+                //System.out.println("--------j------------------" + j + "**" + charsInW[j] );
+                if(charsInW[i] > charsInW[ j]) {
+                   
+                    char temp = charsInW[i];
+                    charsInW[i] = charsInW[j];
+                    charsInW[j] = temp;
+                    if(i > j) {
+                        indexFound = j; 
+                    } else {
+                        indexFound = i; 
+                    }
+                    found = true;
+                    //  System.out.println("-------Replace--- " + indexFound);
+                    i = 0;
+                    j=-1;
+                    break;
                 }
             }
         }
-        return maxValues.stream().max(Comparator.naturalOrder()).get();
-    }
-
-    private static int findNeighbours(Node inode, int[][] aMatrix, Map<Node, Boolean> tracker, int rows, int columns) {
-        Queue<Node> nodes = new LinkedList<>();
-        nodes.add(inode);
-        int rowMin = 0, columnMin = 0 , rowMax = rows -1, columnMax = columns-1;
-        while(nodes.size() != 0) {
-            Node node = nodes.poll();
-            int rowPlusOne = node.getRow() + 1;
-            int rowMinusOne = node.getRow() - 1;
-            int columnPlusOne = node.getColumn() + 1;
-            int columnMinusOne = node.getColumn() - 1;
-            Integer left = null;
-            if(columnMinusOne >= columnMin) {
-                left  = aMatrix[columnMinusOne][node.getRow()];
-                 if(left == 1 && columnMinusOne >= columnMin) {
-                    Node leftNode = new Node(node.getRow(), columnMinusOne);
-                    nodes.add(leftNode);
-                    tracker.put(leftNode, true);
-                }
-            }
-            Integer right = null;
-             if(columnPlusOne <=  columnMax) {
-                right = aMatrix[columnPlusOne][node.getRow()];
-                 if(right == 1 && columnPlusOne <=  columnMax) {
-                    Node rightNode = new Node(node.getRow(), columnPlusOne);
-                    nodes.add(rightNode);
-                    tracker.put(rightNode, true);
-                 }
-             }
-            Integer up = null; 
-            if(rowMinusOne >= rowMin){
-                up = aMatrix[node.getColumn()][rowMinusOne];
-                if(up == 1 && rowMinusOne >= rowMin) {
-                    Node upNode = new Node(rowMinusOne, node.getColumn());
-                    nodes.add(upNode);
-                    tracker.put(upNode, true);
-                }
-            }
-            Integer down = null;
-            if(rowPlusOne <= rowMax) {
-                 down = aMatrix[node.getColumn()][rowPlusOne];
-                 if(down == 1 && rowPlusOne <= rowMax) {
-                   Node downNode = new Node(rowPlusOne, node.getColumn());
-                    nodes.add(downNode);
-                    tracker.put(downNode, true);
-                }
-            }
-           
-           
-           
-            
+        if(!found) {
+            return "no answer";
         }
-        System.out.println("row : " + inode.getRow() + ", column :" + inode.getColumn() + ", Nodes : " + nodes);
-        return nodes.size();
-    }
+        String perfectX = String.valueOf(charsInW);
+        String perfect = perfectX.substring(0, indexFound+1);
+        String toArrange = perfectX.substring(indexFound+1);
+        char[] toArrangeChars = toArrange.toCharArray();
+        Arrays.sort(toArrangeChars);
+        String rest =String.valueOf(toArrangeChars);
+       // System.out.println("------------1--------------");
+       // System.out.println(perfect);
+       // System.out.println(rest);
+       // System.out.println("------------2--------------");
+       
+        return perfect+rest;
 
+    }
 }
 
  class Node {
